@@ -27,7 +27,7 @@ app .get('/frases', (req, res)=>{
         })
 })
 
-app .post('/frases', (req, res)=>{
+/*app .post('/frases', (req, res)=>{
     let frase={
         autor: req.body.autor,
         frase: req.body.frase
@@ -41,7 +41,38 @@ app .post('/frases', (req, res)=>{
             res.status(500).send();
         })
    
-})
+})*/
+
+app.post('/frases', async (req, res) => {
+    const frasesRecebidas = req.body;
+  
+    if (!frasesRecebidas || !Array.isArray(frasesRecebidas) || frasesRecebidas.length === 0) {
+        res.status(404).send();
+    }
+  
+    const frasesSalvas = [];
+  
+    // Utiliza um loop for para iterar sobre as frases
+    for (const { autor, frase } of frasesRecebidas) {
+      try {
+        // Cria um novo objeto Frase
+        const novaFrase = new Frase({
+          autor,
+          frase
+        });
+  
+        // Salva a nova frase no banco de dados e adiciona à lista de frases salvas
+        const fraseSalva = await novaFrase.save();
+        frasesSalvas.push(fraseSalva);
+      } catch (err) {
+        console.error(err);
+            res.status(404).send();
+      }
+    }
+  
+    res.status(201).json(frasesSalvas);
+  });
+  
 
 app.delete('/frases/:id',(req,res)=>{
     let id=req.params.id;
